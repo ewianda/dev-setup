@@ -1,0 +1,152 @@
+; vim:set filetype=dosini:
+
+[alias]
+    fap = fetch --all --prune
+    sb = status -sb
+    st = status -s
+    co = checkout
+    br = branch
+    bv = branch -avv
+    rv = remote -v
+    ci = commit
+    diff = diff --word-diff
+    df = diff --word-diff
+    dc = diff --cached
+    ds = diff --stat
+    m  = checkout master
+    f  = "!git ls-files | grep"
+    grep = "grep -I"
+    undo = reset --soft HEAD^
+    count = shortlog -sn
+;    credit = commit --amend --author "$1 <$2>" -C HEAD
+
+    pom = push origin master
+
+    wip = !"git add -A; git ls-files --deleted -z | xargs -0 git rm; git commit -m \"wip\""
+    unwip = !"git log -n 1 | grep -q -c wip && git reset HEAD~1"
+    rb = !"git wip;git rebase -i origin/master;git unwip"
+    pr = !"git fetch;git wip;git rebase --stat origin;git unwip;git heads"
+    head = !"git log -n1"
+    lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    heads = !"git log origin/master.. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    #lg = log --graph --pretty=oneline --abbrev-commit
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    lgc= log --oneline --left-right --cherry-pick
+    lm= log --no-merges --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    lc = log ORIG_HEAD.. --stat --no-merges
+    lol = log --graph --decorate --pretty=oneline --abbrev=commit
+    lola = log --graph --decorate --pretty=oneline --abbrev=commit --all
+    changelog = log --pretty=format:"%h%x09%ad%x09%ae%x09%s" --date=iso
+    sh = show --pretty=raw
+    lh = log --pretty=format:"%h %s" --graph
+    dump = cat-file -p
+    type = cat-file -t
+    exec = "!exec "
+    tld = rev-parse --show-toplevel
+    active = !"for k in `git branch |sed 's/^..//'`;do echo `git log -1 --pretty=format:'%Cgreen%ci %Cblue%cr%Creset' \"$k\"`\\\t\"$k\";done|sort -r"
+    activer = !"for k in `git branch -a|sed 's/^..//'`;do [ \"$k\" = \"->\" ] && continue; echo `git log -1 --pretty=format:'%Cgreen%ci %Cblue%cr%Creset' \"$k\"`\\\t\"$k\";done|sort -r"
+    done = "!f() { git branch | grep "$1" | cut -c 3- | grep -v done | xargs -I{} git branch -m {} done-{}; }; f"
+    #thisbranch = name-rev --name-only HEAD
+    thisbranch = rev-parse --abbrev-ref HEAD
+    tagnames = !"git log --pretty=oneline | git name-rev --stdin"
+
+; from https://git.wiki.kernel.org/index.php/Aliases
+    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+
+;   grep from root folder
+    gra = "!f() { A=$(pwd) && TOPLEVEL=$(git rev-parse --show-toplevel) && cd $TOPLEVEL && git grep --full-name -In $1 | xargs -I{} echo $TOPLEVEL/{} && cd $A; }; f"
+;   from http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
+    find = "!git ls-file | grep -i"
+    grep = "grep -I"
+    fp = "!git commit --amend -n --no-edit && git push origin -fu"
+
+[push]
+    default = current
+
+[branch]
+    autosetuprebase = always
+
+[log]
+    date = local
+
+[color]
+    ui = true
+    pager = true
+    diff = auto
+    status = auto
+    branch = auto
+    interactive = auto
+
+[pager]
+    log = diff-highlight | less
+    show = diff-highlight | less
+    diff = diff-highlight | less
+
+
+[color "diff"]
+    whitespace = red reverse
+
+[core]
+    editor = vim
+    autocrlf = false
+	excludesFile = ~/.gitignore
+    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+    preloadindex = true
+
+[color "status"]
+    added = green
+    changed = yellow
+    untracked = red
+
+[grep]
+    extendedRegexp = true
+
+[diff]
+    guitool = p4merge
+    tool    = vimdiff
+    renames = copies
+    algorithm = patience
+    renameLimit = 1000
+
+[difftool]
+; cmd = p4merge \"$LOCAL\" \"$REMOTE\"
+    prompt = false
+
+[difftool "sourcetree"]
+    cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+    path =
+
+[merge]
+    tool = p4merge
+; tool = vimdiff
+    keepBackup = false
+
+[mergetool "sourcetree"]
+    cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    trustExitCode = true
+
+[mergetool "p4merge"]
+; cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+    keepTemporaries = false
+    trustExitCode = false
+    keepBackup = false
+
+[rerere]
+	enabled = 1
+    autoupdate = 1
+
+; URL rewriting example
+;[url "file:///home/abakshi/base/repo/.git"]
+;        insteadOf = "git@git.foo.com:base/repo.git"
+
+[hub]
+    protocol = https
+[user]
+	name = Elvis Wianda
+	email = elvis@benchsci.com
+	signingkey = 01C39F5540A3B918
+[gpg]
+	program = gpg
+[commit]
+	gpgsign = true

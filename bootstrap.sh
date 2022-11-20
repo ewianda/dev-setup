@@ -91,11 +91,16 @@ update_vim_config() {
     backup "$XDG_CONFIG_HOME/nvim"
     ln -sfn "$(basename "$VIM")" "$XDG_CONFIG_HOME/nvim"
     ln -sfn vimrc "$(dirname "$VIMRC")"/init.vim
+    if ! test -x "$HOME"/bin/diff-highlight; then
+        curl -fsSL --create-dirs https://raw.githubusercontent.com/git/git/fd99e2bda0ca6a361ef03c04d6d7fdc7a9c40b78/contrib/diff-highlight/diff-highlight -o "$HOME"/bin/diff-highlight \
+        && chmod +x "$HOME"/bin/diff-highlight
+    fi
 
     curl -fsSL --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim -o $VIM/autoload/plug.vim
 
     if [ -r /dev/tty ]; then
       bash -c '</dev/tty vim "$@"' vim -T dumb '+PlugInstall' '+PlugUpgrade' '+qall!' || true
+      bash -c '</dev/tty vim "$@"' vim -T dumb '+CocInstall coc-tsserver' || true
     elif ! [[ $OSTYPE =~ ^freebsd ]]; then
         if command -v nvim &>/dev/null; then
             nvim --headless -c ':PlugUpgrade' -c ':PlugUpdate' -c ':qall' || true
@@ -118,6 +123,7 @@ install_config() {
     curl -fsSL https://gist.github.com/ambakshi/d111202b21041db55a80/raw -o ${GITCONF}
     [ -n "$GNAME" ] && git config --global user.name "$GNAME" || :
     [ -n "$GEMAIL" ] && git config --global user.email "$GEMAIL" || :
+    git config --global core.excludesFile '~/.gitignore'
 
     test -e ~/.tmux.conf || curl -fsSL https://gist.githubusercontent.com/ambakshi/51c994271a216016edef/raw/tmuxconf -o ~/.tmux.conf
     test -e ~/.inputrc || curl -fsSL https://gist.githubusercontent.com/ambakshi/51c994271a216016edef/raw/inputrc -o ~/.inputrc
@@ -132,6 +138,7 @@ main() {
 	install_fzf
 	#install_vim
 	#install_config
+	update_vim_config
 
 
 }
