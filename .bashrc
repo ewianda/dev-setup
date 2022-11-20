@@ -10,7 +10,7 @@ esac
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
-HISTCONTROL=ignoreboth
+export HISTCONTROL=ignoredups:erasedups
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -18,6 +18,11 @@ shopt -s histappend
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=100000
 HISTFILESIZE=200000
+# avoid duplicates..
+
+
+# After each command, save and reload history
+
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -56,12 +61,7 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
-unset color_prompt force_color_prompt
+
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
@@ -71,6 +71,21 @@ xterm*|rxvt*)
 *)
     ;;
 esac
+
+. /usr/lib/git-core/git-sh-prompt
+
+export GIT_PS1_SHOWCOLORHINTS=true # Option for git-prompt.sh to show branch name in color
+export GIT_PS1_SHOWDIRTYSTATE=true
+export GIT_PS1_SHOWUNTRACKEDFILES=true
+export GIT_PS1_SHOWUPSTREAM="auto"
+
+# Terminal Prompt:
+# Include git branch, use PROMPT_COMMAND (not PS1) to get color output (see git-prompt.sh for more)
+# export PROMPT_COMMAND='__git_ps1 "\u@\h:\w" "\\\$ "'
+export PROMPT_COMMAND='__git_ps1 "\w" "\n\\\$ "'
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -120,22 +135,21 @@ if [ -f '/usr/local/bin/virtualenvwrapper.sh' ]; then . '/usr/local/bin/virtuale
 export EDITOR=vim
 
 # The username to the postgres instance
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/home/ewianda/google-cloud-sdk/path.bash.inc' ]; then . '/home/ewianda/google-cloud-sdk/path.bash.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/home/ewianda/google-cloud-sdk/completion.bash.inc' ]; then . '/home/ewianda/google-cloud-sdk/completion.bash.inc'; fi
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
+    PATH="$PATH:$HOME/bin"
 fi
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
+    PATH="$PATH:$HOME/.local/bin"
 fi
-PATH="$HOME/go/bin:$PATH"
+
+export GOPATH=$HOME/go
+export GOBIN=$HOME/go/bin
+
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
 
 alias docker_clean='docker network prune -f || true && docker kill $(docker ps -q)'
 
@@ -146,5 +160,34 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export FZF_DEFAULT_COMMAND='rg --files --follow --no-ignore-vcs --hidden -g "!{node_modules/*,.git/*,bazel-*}"'
-
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+#export PROMPT_COMMAND="history -a; history -n"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+export BAZEL_BUILD_MATCH_PATTERN__test='(.*_test|test_suite|pytest|py_library)'
+export BAZEL_QUERY_MATCH_PATTERN__test='(test|test_suite|pytest)'
+export BAZEL_BUILD_MATCH_PATTERN_RUNTEST__bin='(.*_(binary|test)|test_suite|pytest|py_library)'
+export BAZEL_QUERY_MATCH_PATTERN_RUNTEST__bin='(binary|test|pytest)'
+export ANDROID_SDK=/home/ewianda/Android/Sdk
+export PATH=$PATH:/home/ewianda/Android/Sdk/platform-tools/
+
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PATH:$PYENV_ROOT/bin"
+eval "$(pyenv init --path)" 
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+alias bstack='f() { git reflog | grep checkout | cut -d " " -f 8 | uniq | head ${1} | cat -n  };f'
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/ewianda/google-cloud-sdk/path.bash.inc' ]; then . '/home/ewianda/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/ewianda/google-cloud-sdk/completion.bash.inc' ]; then . '/home/ewianda/google-cloud-sdk/completion.bash.inc'; fi
+export PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
+export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/cuda-11.6/lib64:/usr/local/cuda-11.2/lib64/:/usr/local/cuda-11.6/targets/x86_64-linux/lib64/:/usr/local/cuda-11.6/targets/x86_64-linux/lib:/usr/lib/x86_64-linux-gnu
+#export PAGER="vim -R +AnsiEsc"
+
+# tabtab source for packages
+# uninstall by removing these lines
+[ -f ~/.config/tabtab/bash/__tabtab.bash ] && . ~/.config/tabtab/bash/__tabtab.bash || true
