@@ -43,8 +43,8 @@ Plug 'dkprice/vim-easygrep'
 "Plug 'prabirshrestha/asyncomplete.vim'
 "Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'derekwyatt/vim-scala'
-"Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+"Plug 'neoclide/coc.nvim', {'rev': 'release', 'do': 'yarn install --frozen-lockfile'}
 Plug 'vim-scripts/cscope_macros.vim'
 
 Plug 'gurpreetatwal/vim-avro'
@@ -65,7 +65,7 @@ Plug 'fatih/vim-go'
 Plug 'powerman/vim-plugin-AnsiEsc'
 "Plug 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build', 'branch': 'main'  }
 
-Plug 'psf/black', { 'branch': '19.10b0'  }
+Plug 'psf/black'
 Plug 'fisadev/vim-isort'
 " All of your Plugins must be added before the following line
 " Add maktaba and codefmt to the runtimepath.
@@ -280,7 +280,6 @@ function! CheckBackspace() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-
 " Use <c-space> to trigger completion.
 if has('nvim')
   inoremap <silent><expr> <c-space> coc#refresh()
@@ -291,6 +290,11 @@ endif
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+try
+	nmap <silent> [c :call CocAction('diagnosticNext')<cr>
+	nmap <silent> ]c :call CocAction('diagnosticPrevious')<cr>
+endtry
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
@@ -417,4 +421,3 @@ augroup END
 
 au BufReadCmd *.whl call zip#Browse(expand("<amatch>"))
 let g:coc_disable_startup_warning = 1
-
