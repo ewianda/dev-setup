@@ -13,6 +13,7 @@ Plug 'gmarik/Vundle.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'pangloss/vim-javascript'
 Plug 'Glench/Vim-Jinja2-Syntax'
+Plug 'amadeus/vim-css'
 "Plug 'lervag/vimtex'
 
 " Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
@@ -24,6 +25,7 @@ Plug 'epeli/slimux'
 Plug 'othree/html5.vim'
 Plug 'gregsexton/MatchTag'
 " Plug 'JCLiang/vim-cscope-utils'
+"Plug 'neomake/neomake'
 " Plug 'c.vim'
 Plug 'nvie/vim-flake8'
 Plug 'jistr/vim-nerdtree-tabs'
@@ -42,9 +44,8 @@ Plug 'dkprice/vim-easygrep'
 "Plug 'prabirshrestha/asyncomplete-lsp.vim'
 Plug 'derekwyatt/vim-scala'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+"Plug 'neoclide/coc.nvim', {'rev': 'release', 'do': 'yarn install --frozen-lockfile'}
 Plug 'vim-scripts/cscope_macros.vim'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-
 
 Plug 'gurpreetatwal/vim-avro'
 Plug 'tweekmonster/django-plus.vim'
@@ -53,10 +54,32 @@ Plug 'tweekmonster/django-plus.vim'
 " Plug 'vim-scripts/gnuplot-syntax-highlighting'
 "Bundle 'ensime/ensime-vim'
 "Plug 'klen/python-mode'
+Plug 'chemzqm/vim-jsx-improve'
+Plug 'airblade/vim-gitgutter'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install'  }
+Plug 'HerringtonDarkholme/yats.vim'
+Plug 'yuezk/vim-js'
+Plug 'maxmellon/vim-jsx-pretty'
+Plug 'alvan/vim-closetag'
+Plug 'fatih/vim-go'
+Plug 'powerman/vim-plugin-AnsiEsc'
+"Plug 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build', 'branch': 'main'  }
 
+Plug 'psf/black'
+Plug 'fisadev/vim-isort'
 " All of your Plugins must be added before the following line
+" Add maktaba and codefmt to the runtimepath.
+" (The latter must be installed before it can be used.)
+Plug 'google/vim-maktaba'
+Plug 'google/vim-codefmt'
+" Also add Glaive, which is used to configure codefmt's maktaba flags. See
+" `:help :Glaive` for usage.
+Plug 'google/vim-glaive'
+
 call plug#end()
-filetype plugin indent on    " required
+call glaive#Install()
+
+"filetype plugin indent on    " required
 
 " Configuration for vim-scala
 au BufRead,BufNewFile *.sbt set filetype=scala
@@ -111,11 +134,6 @@ if executable('java') && filereadable(expand('~/lsp/eclipse.jdt.ls/plugins/org.e
         \ 'root_uri' : { server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_directory(lsp#utils#get_buffer_path(), 'pom.xml/..')) }, 
         \ })
 endif
-au User lsp_setup call lsp#register_server({
-	\ 'name': 'pyls',
-	\ 'cmd': {server_info->['pyls']},
-	\ 'whitelist': ['python']
-	\ })
 
 
 let g:SimpylFold_docstring_preview=1
@@ -141,7 +159,7 @@ set encoding=utf-8
 autocmd VimEnter,BufNewFile,BufReadPost * silent! call HardMode()
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
-let python_highlight_all=1
+"let python_highlight_all=1
 syntax on
 "let g:syntastic_always_populate_loc_list = 1
 "let g:syntastic_auto_loc_list = 1
@@ -149,12 +167,22 @@ syntax on
 "let g:syntastic_python_checkers = ['pylint','pyflakes','pep8']
 "let g:syntastic_check_on_wq = 0
 "
+" When writing a buffer (no delay).
+"call neomake#configure#automake('w')
+" When writing a buffer (no delay), and on normal mode changes (after 750ms).
+"call neomake#configure#automake('nw', 750)
+" When reading a buffer (after 1s), and when writing (no delay).
+"call neomake#configure#automake('rw', 1000)
+" Full config: when writing or reading a buffer, and on changes in insert and
+" normal mode (after 1s; no delay when writing).
+"call neomake#configure#automake('nrwi', 500)
+
+"let g:neomake_scala_enabled_makers = ['fsc','scalastyle']
+
 let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
 set number
 set t_Co=256
-if has('gui_running')
-  colorscheme github
-endif
+colorscheme github
 set background=light
 set nobackup
 
@@ -232,30 +260,41 @@ set shortmess+=c
 set signcolumn=yes
 
 " Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+" NOTE: There's always complete item selected by default, you may want to enable
+" no select by `"suggest.noselect": true` in your configuration file.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
       \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-function! s:check_back_space() abort
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice.
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
 " Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
-
-" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" Or use `complete_info` if your vim support it, like:
-" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+try
+	nmap <silent> [c :call CocAction('diagnosticNext')<cr>
+	nmap <silent> ]c :call CocAction('diagnosticPrevious')<cr>
+endtry
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
@@ -350,3 +389,35 @@ let g:ctrlp_working_path_mode = 'r'
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files']
 
 autocmd FileType html setlocal expandtab shiftwidth=2 tabstop=2
+
+let g:closetag_filenames = "*.html,*.jsx,*.tsx,*.vue,*.xhml,*.xml,*.js"
+let g:closetag_regions = {
+  \ 'typescript.tsx': 'jsxRegion,tsxRegion',
+  \ 'javascript.jsx': 'jsxRegion',
+  \ }
+let g:closetag_shortcut = '>'
+let g:prettier#config#tab_width = '2'
+let g:prettier#config#use_tabs = 'false'
+autocmd BufWritePre *.py execute ':Isort'
+autocmd BufWritePre *.py execute ':Black'
+autocmd BufWritePre *.jsx,*.tsx,*.js,*.ts,*.json execute ':Prettier'
+
+au BufRead,BufNewFile *.css set filetype=css
+
+" disable vim-go :GoDef short cut (gd)
+" this is handled by LanguageClient [LC]
+let g:go_def_mapping_enabled = 0
+
+augroup autoformat_settings
+  autocmd FileType bzl AutoFormatBuffer buildifier
+  autocmd FileType c,cpp,proto,javascript,arduino AutoFormatBuffer clang-format
+  autocmd FileType html,css,sass,scss,less,json AutoFormatBuffer js-beautify
+  autocmd FileType java AutoFormatBuffer google-java-format
+  " Alternative: autocmd FileType python AutoFormatBuffer autopep8
+  autocmd FileType rust AutoFormatBuffer rustfmt
+  autocmd FileType vue AutoFormatBuffer prettier
+  autocmd FileType swift AutoFormatBuffer swift-format
+augroup END
+
+au BufReadCmd *.whl call zip#Browse(expand("<amatch>"))
+let g:coc_disable_startup_warning = 1
