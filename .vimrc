@@ -77,7 +77,7 @@ Plug 'google/vim-codefmt'
 Plug 'google/vim-glaive'
 
 call plug#end()
-call glaive#Install()
+!silent call glaive#Install()
 
 "filetype plugin indent on    " required
 
@@ -182,7 +182,7 @@ syntax on
 let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
 set number
 set t_Co=256
-colorscheme github
+silent! colorscheme github
 set background=light
 set nobackup
 
@@ -421,3 +421,10 @@ augroup END
 
 au BufReadCmd *.whl call zip#Browse(expand("<amatch>"))
 let g:coc_disable_startup_warning = 1
+let g:coc_disable_startup_warning = 1
+
+let g:shfmt_extra_args = '-i 2'
+let g:shfmt_fmt_on_save = 1
+hi default CocListFgCyan guifg=#8BE9FD ctermfg=Cyan
+hi default CocListFgGreen guifg=#50FA7B ctermfg=Green
+hi default CocListFgRed guifg=#cc241d ctermfg=Red
