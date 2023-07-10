@@ -13,6 +13,16 @@ have_cmd() {
   done
   return 0
 }
+install_golang() {
+  if have_cmd go; then
+    return 0
+  fi
+  echo >&2 "installing golang ..."
+  export GOROOT=/usr/local/go
+  export GOPATH=$HOME/go
+  curl https://raw.githubusercontent.com/canha/golang-tools-install-script/master/goinstall.sh | bash -s -- --version 1.18
+  $GOROOT/bin/go install github.com/bazelbuild/buildtools/buildifier@latest
+}
 install_git() {
   if have_cmd git; then
     return 0
@@ -25,7 +35,8 @@ install_fzf() {
     return 0
   fi
   echo >&2 "installing fzf ..."
-  sudo apt-get install fzf -y
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+  ~/.fzf/install --all
 }
 install_vim() {
   if have_cmd vim; then
@@ -43,6 +54,7 @@ install_node() {
   fi
   echo >&2 "installing node ..."
   sudo curl -sL install-node.vercel.app/16 | sudo bash -s -- -y
+  sudo npm install --global yarn
 }
 
 export BACKUP_DT=${BACKUP_DT:-$(date +%Y%m%d-%H%M)}
@@ -112,6 +124,7 @@ update_vim_config() {
   curl -fsSL --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim -o $VIM/autoload/plug.vim
   vim -c 'PlugInstall|qa'
   vim -c 'PlugUpdate|qa'
+  vim +'CocInstall -sync coc-json coc-html coc-pyright coc-sh coc-go' +qall
 
 }
 
@@ -139,13 +152,14 @@ install_config() {
 main() {
   echo "Installing"
   (apt update -yqq && apt install sudo curl -yqq) || true
-  sudo apt install default-jre -yqq
+  sudo apt install default-jre shellcheck -yqq
   install_git
   install_node
   install_fzf
   install_vim
   install_config
   update_vim_config
+  install_golang
 
 }
 main $@
