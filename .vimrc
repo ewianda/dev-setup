@@ -77,7 +77,7 @@ Plug 'google/vim-codefmt'
 Plug 'google/vim-glaive'
 
 call plug#end()
-!silent call glaive#Install()
+silent! call glaive#Install()
 
 "filetype plugin indent on    " required
 
