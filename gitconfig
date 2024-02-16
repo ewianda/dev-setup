@@ -142,10 +142,6 @@
 
 [hub]
     protocol = https
-[user]
-	name = Elvis Wianda
-	email = elvis@benchsci.com
-	signingkey = 01C39F5540A3B918
 [gpg]
 	program = gpg
 [commit]
