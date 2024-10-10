@@ -173,9 +173,9 @@ export PATH=$PATH:/home/ewianda/Android/Sdk/platform-tools/
 
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PATH:$PYENV_ROOT/bin"
-eval "$(pyenv init --path)" 
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+#eval "$(pyenv init --path)" 
+#eval "$(pyenv init -)"
+#eval "$(pyenv virtualenv-init -)"
 
 alias bstack='f() { git reflog | grep checkout | cut -d " " -f 8 | uniq | head ${1} | cat -n  };f'
 
