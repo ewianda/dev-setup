@@ -145,8 +145,13 @@ backup_existing_paths() {
     local target
     local backup
     local timestamp
-    timestamp="${BACKUP_TIMESTAMP:-$(date '+%Y%m%d-%H%M%S')}"
 
+    # Generate the timestamp once per function call
+    if [ -n "${BACKUP_TIMESTAMP:-}" ]; then
+        timestamp="$BACKUP_TIMESTAMP"
+    else
+        timestamp="$(date '+%Y%m%d-%H%M%S')"
+    fi
     while IFS= read -r -d '' file; do
         rel_path="${file#"$package_dir/"}"
         target="$HOME/$rel_path"
