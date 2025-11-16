@@ -147,8 +147,9 @@ fi
 
 export GOPATH=$HOME/go
 export GOBIN=$HOME/go/bin
+export GOROOT=${GOROOT:-$HOME/.local/share/go}
 
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+export PATH=$PATH:$GOROOT/bin:$GOBIN
 
 
 alias docker_clean='docker network prune -f || true && docker kill $(docker ps -q)'
